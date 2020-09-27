@@ -6,27 +6,17 @@ const stringDecoder = require('string_decoder').StringDecoder;
 const FS = require('fs');
 
 // importing local files
-const config = require('./config');
+const config = require('./lib/config');
+const handlers = require('./lib/handlers');
 const _data = require('./lib/data');
-
-// Making haldlers to handle the route request
-const handlers = {
-    sample: (data, callback) => {
-        callback(200, { name: 'Sakil Mahmud' });
-    },
-    notFound: (data, callback) => {
-        callback(404);
-    },
-    ping: (data, callback) => {
-        callback(200);
-    },
-};
+const helpers = require('./lib/helpers');
 
 // Making router to serve our request handlers
 const router = {
-    sample: handlers.sample,
     notFound: handlers.notFound,
     ping: handlers.ping,
+    users: handlers.users,
+    tokens: handlers.tokens,
 };
 
 // All the server logic and both HTTP and HTTPS server
@@ -70,7 +60,7 @@ const unifiedServer = (req, res) => {
             path: trimmedPath,
             method: method,
             queries: queryStringObject,
-            body: buffer,
+            payload: helpers.parseJsonToObject(buffer),
         };
 
         // calling the specified router handler with appropriate data
@@ -79,11 +69,12 @@ const unifiedServer = (req, res) => {
             payload = typeof payload === 'object' ? payload : {};
             const payloadString = JSON.stringify(payload);
 
-            res.setHeader('Content-Type', 'application/json');
+            // res.setHeader('Content-Type', 'application/json');
             res.writeHead(statusCode);
             res.end(payloadString);
 
-            console.log(statusCode, payloadString, data);
+            // logging out the whole request
+            // console.log(statusCode, payloadString, data);
         });
     });
 };

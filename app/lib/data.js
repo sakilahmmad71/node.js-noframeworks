@@ -1,7 +1,9 @@
-const { error } = require('console');
 // Importing all necessary modules
 const FS = require('fs');
 const PATH = require('path');
+
+// Importing necessary files from local directory
+const helpers = require('./helpers');
 
 const lib = {
     baseDir: PATH.join(__dirname, '/../.data/'),
@@ -31,6 +33,10 @@ const lib = {
 
     read: (dir, file, callback) => {
         FS.readFile(`${lib.baseDir}${dir}/${file}.json`, 'utf-8', (err, data) => {
+            if (!err && data) {
+                const parsedData = helpers.parseJsonToObject(data);
+                callback(false, parsedData);
+            }
             callback(err, data);
         });
     },
